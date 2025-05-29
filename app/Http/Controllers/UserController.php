@@ -82,4 +82,68 @@ class UserController extends Controller
     public function showLoginForm() {
         return view('auth.login');
     }
+
+    public function edit($id) {
+        $user = User::findOrFail($id);
+
+        return view('users.editProfile', compact('user'));
+    }
+
+    public function update(Request $request, $id) {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'addres' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'profile_image' => 'nullable|image|max:2048'
+        ]);
+
+        if ($request->hasFile('profile_image')) {
+            $imagePath = $request->file('profile_image')->store('avatar', 'public');
+
+            $validated['profile_image'] = $imagePath;
+        }
+        else {
+            $validated['profile_image'] = $user->profile_image;
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('users.show', $user->id)->with('success', 'Profile Update Success!');
+    }
+
+    public function changePassword(Request $request, $id) {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8',
+        ]);
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return redirect()->back()->with('error', 'Current Password is Incorrect!');
+        }
+
+        $user->password = bcrypt($validated['new_password']);
+        $user->save();
+
+        return redirect()->back()->with('success', 'Password Change Success!');
+    }
+
+    
+    public function logout() {
+        Auth::logout();
+
+        return redirect()->route('dashboard');
+    }
+    
+    public function destroy($id) {
+        $user = User::findOrFail($id);
+
+        $user->delete();
+
+        return redirect()->route('users.dashboard');
+    }
 }
