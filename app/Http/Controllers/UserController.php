@@ -14,9 +14,9 @@ class UserController extends Controller
 {
     public function index() {
         $books = Book::all();
-        $genre = Genre::all();
+        $genres = Genre::all();
 
-        return view('users.dashboard', compact('books', 'genre'));
+        return view('users.dashboard', compact('books', 'genres'));
     }
 
     public function show($id) {

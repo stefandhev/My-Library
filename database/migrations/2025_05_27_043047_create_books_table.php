@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('author');
             $table->string('isbn')->unique();
             $table->date('publish_date')->nullable();
-            $table->foreignId('genre')->constrained()->onDelete('cascade');
+            $table->foreignId('genre_id')->constrained()->onDelete('cascade');
             $table->string('description')->nullable();
             $table->string('image_url')->nullable();
             $table->enum('status', ['tersedia', 'dipinjam'])->default('tersedia');
